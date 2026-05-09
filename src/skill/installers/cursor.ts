@@ -87,7 +87,7 @@ function buildCursorRule(skill: { description: string; body: string }): string {
     "alwaysApply: false",
     "---",
     "",
-    `> Source: https://github.com/${SKILL_REPO} - run \`ching skills install\` to refresh.`,
+    `> Source: https://github.com/${SKILL_REPO} - run \`ching skill install\` to refresh.`,
     "",
     skill.body.trim(),
     "",

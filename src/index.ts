@@ -16,10 +16,10 @@ import { customersGetCommand } from "./commands/customers/get"
 import { customersCreateCommand } from "./commands/customers/create"
 import { projectsListCommand } from "./commands/projects/list"
 import { projectsCreateCommand } from "./commands/projects/create"
-import { skillsInstallCommand } from "./commands/skills/install"
-import { skillsUninstallCommand } from "./commands/skills/uninstall"
-import { skillsListCommand } from "./commands/skills/list"
-import { skillsUpdateCommand } from "./commands/skills/update"
+import { skillInstallCommand } from "./commands/skill/install"
+import { skillUninstallCommand } from "./commands/skill/uninstall"
+import { skillListCommand } from "./commands/skill/list"
+import { skillUpdateCommand } from "./commands/skill/update"
 
 interface PackageJson {
   version?: string
@@ -104,11 +104,11 @@ program
     await openCommand(page, mergeGlobals(opts))
   })
 
-// skills
-const skills = program
-  .command("skills")
+// skill
+const skill = program
+  .command("skill")
   .description("Install the CHING skill into your AI tools (Claude Code, Cursor)")
-skills
+skill
   .command("install")
   .description("Download and install the CHING skill")
   .option("--target <ids>", "Comma-separated subset of: claude, cursor (default: all detected)")
@@ -116,31 +116,31 @@ skills
   .option("--project", "Install in the current project (./.claude, ./.cursor)")
   .option("--force", "Overwrite an existing install")
   .action(async (opts) => {
-    await skillsInstallCommand(mergeGlobals(opts))
+    await skillInstallCommand(mergeGlobals(opts))
   })
-skills
+skill
   .command("update")
   .description("Fetch the latest skill from GitHub and refresh existing installs")
   .option("--target <ids>", "Comma-separated subset of: claude, cursor (default: all installed)")
   .option("--global", "Update the install in your home directory")
   .option("--project", "Update the install in the current project")
   .action(async (opts) => {
-    await skillsUpdateCommand(mergeGlobals(opts))
+    await skillUpdateCommand(mergeGlobals(opts))
   })
-skills
+skill
   .command("uninstall")
   .description("Remove the CHING skill from your AI tools")
   .option("--target <ids>", "Comma-separated subset of: claude, cursor (default: all)")
   .option("--global", "Remove from your home directory")
   .option("--project", "Remove from the current project")
   .action(async (opts) => {
-    await skillsUninstallCommand(mergeGlobals(opts))
+    await skillUninstallCommand(mergeGlobals(opts))
   })
-skills
+skill
   .command("list")
   .description("Show where the skill is currently installed")
   .action(async (opts) => {
-    await skillsListCommand(mergeGlobals(opts))
+    await skillListCommand(mergeGlobals(opts))
   })
 
 // projects

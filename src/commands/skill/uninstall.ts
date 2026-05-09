@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts"
-import { INSTALLERS, installerById } from "@/skills/installers"
-import type { InstallScope, Installer } from "@/skills/installers"
+import { INSTALLERS, installerById } from "@/skill/installers"
+import type { InstallScope, Installer } from "@/skill/installers"
 import { theme, symbols, brandMark } from "@/ui/theme"
 import { exitWithError } from "@/ui/error"
 import { readConfig } from "@/config/store"
@@ -48,7 +48,7 @@ function pickTargets(flags: UninstallFlags): Installer[] {
     })
 }
 
-export async function skillsUninstallCommand(flags: UninstallFlags): Promise<void> {
+export async function skillUninstallCommand(flags: UninstallFlags): Promise<void> {
   const json = !!flags.json
   const isTty = !!process.stdin.isTTY && !json
 

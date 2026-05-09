@@ -1,8 +1,8 @@
 import fs from "node:fs"
 import * as p from "@clack/prompts"
-import { downloadSkill } from "@/skills/download"
-import { INSTALLERS, installerById } from "@/skills/installers"
-import type { InstallScope, Installer } from "@/skills/installers"
+import { downloadSkill } from "@/skill/download"
+import { INSTALLERS, installerById } from "@/skill/installers"
+import type { InstallScope, Installer } from "@/skill/installers"
 import { theme, symbols, brandMark } from "@/ui/theme"
 import { exitWithError } from "@/ui/error"
 import { readConfig } from "@/config/store"
@@ -75,7 +75,7 @@ function narrowByTarget(installers: Installer[], target: string | undefined): In
   return installers.filter((i) => ids.includes(i.id))
 }
 
-export async function skillsUpdateCommand(flags: UpdateFlags): Promise<void> {
+export async function skillUpdateCommand(flags: UpdateFlags): Promise<void> {
   const json = !!flags.json
   const isTty = !!process.stdin.isTTY && !json
 
@@ -94,7 +94,7 @@ export async function skillsUpdateCommand(flags: UpdateFlags): Promise<void> {
       const where = scope === "global" ? "globally" : "in the current project"
       const hint =
         installed.length === 0
-          ? `Nothing is installed ${where}. Run \`ching skills install\` first.`
+          ? `Nothing is installed ${where}. Run \`ching skill install\` first.`
           : `No matching installs ${where}. Currently installed: ${installed.map((i) => i.id).join(", ")}.`
 
       if (json) {

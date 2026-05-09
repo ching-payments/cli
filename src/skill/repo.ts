@@ -1,5 +1,5 @@
 // Public skill repo. The CLI always pulls the latest `main` branch -
-// users get skill updates by re-running `ching skills install`.
+// users get skill updates by re-running `ching skill install`.
 export const SKILL_REPO = "ching-payments/skill"
 export const SKILL_BRANCH = "main"
 export const SKILL_SLUG = "ching-payments-integration"

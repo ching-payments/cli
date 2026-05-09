@@ -1,5 +1,5 @@
 import fs from "node:fs"
-import { INSTALLERS } from "@/skills/installers"
+import { INSTALLERS } from "@/skill/installers"
 import { renderTable } from "@/ui/table"
 import { theme, symbols, brandMark } from "@/ui/theme"
 import { exitWithError } from "@/ui/error"
@@ -9,7 +9,7 @@ interface ListFlags {
   json?: boolean
 }
 
-export async function skillsListCommand(flags: ListFlags): Promise<void> {
+export async function skillListCommand(flags: ListFlags): Promise<void> {
   const json = !!flags.json
   try {
     const cwd = process.cwd()
@@ -38,7 +38,7 @@ export async function skillsListCommand(flags: ListFlags): Promise<void> {
       return
     }
 
-    process.stderr.write(`${brandMark()} ${theme.muted("· installed skills")}\n\n`)
+    process.stderr.write(`${brandMark()} ${theme.muted("· skill installs")}\n\n`)
 
     const table = renderTable(rows, [
       { header: "Tool", render: (r) => theme.bold(r.installer.label) },

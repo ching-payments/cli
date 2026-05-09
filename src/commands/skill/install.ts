@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts"
-import { downloadSkill } from "@/skills/download"
-import { INSTALLERS, installerById } from "@/skills/installers"
-import type { InstallScope, Installer } from "@/skills/installers"
+import { downloadSkill } from "@/skill/download"
+import { INSTALLERS, installerById } from "@/skill/installers"
+import type { InstallScope, Installer } from "@/skill/installers"
 import { theme, symbols, brandMark } from "@/ui/theme"
 import { exitWithError } from "@/ui/error"
 import { readConfig } from "@/config/store"
@@ -112,7 +112,7 @@ async function pickInstallers(
   return (ans as string[]).map((id) => installerById(id)!).filter(Boolean)
 }
 
-export async function skillsInstallCommand(flags: InstallFlags): Promise<void> {
+export async function skillInstallCommand(flags: InstallFlags): Promise<void> {
   const json = !!flags.json
   const isTty = !!process.stdin.isTTY && !json
 
