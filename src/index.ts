@@ -14,6 +14,8 @@ import { pricesCreateCommand } from "./commands/prices/create"
 import { customersListCommand } from "./commands/customers/list"
 import { customersGetCommand } from "./commands/customers/get"
 import { customersCreateCommand } from "./commands/customers/create"
+import { projectsListCommand } from "./commands/projects/list"
+import { projectsCreateCommand } from "./commands/projects/create"
 
 interface PackageJson {
   version?: string
@@ -96,6 +98,25 @@ program
   .description("Open a dashboard page in the browser")
   .action(async (page: string | undefined, opts) => {
     await openCommand(page, mergeGlobals(opts))
+  })
+
+// projects
+const projects = program.command("projects").description("Manage projects on your account")
+projects
+  .command("list")
+  .description("List projects you have access to (active project is marked)")
+  .action(async (opts) => {
+    await projectsListCommand(mergeGlobals(opts))
+  })
+projects
+  .command("create")
+  .description("Create a new project")
+  .option("--name <name>", "Project name")
+  .option("--business-identity-id <id>", "Attach an existing business identity (numeric id)")
+  .option("--switch", "Set the new project as active even if you already have one")
+  .option("--no-switch", "Do not switch to the new project even if you have none active")
+  .action(async (opts) => {
+    await projectsCreateCommand(mergeGlobals(opts))
   })
 
 // products

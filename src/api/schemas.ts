@@ -15,6 +15,8 @@ export const projectSchema = z.object({
   id: z.number(),
   visibleId: z.string(),
   name: z.string(),
+  businessIdentityId: z.number().nullable().optional(),
+  createdAt: z.string().nullable().optional(),
 })
 
 export const projectListSchema = z.array(projectSchema)

@@ -62,6 +62,15 @@ ching prices create \
 
 Amounts are always in **agorot** (the smallest ILS unit). `₪49.90` → `--amount=4990`. The CLI rejects decimals with a clear error.
 
+### List or create projects
+
+```sh
+ching projects list              # active project is marked with a green ✓
+ching projects create --name "My new shop"
+```
+
+A new project becomes active automatically if you didn't have one. Pass `--switch` to make it active even when you already have one, or `--no-switch` to keep your current selection.
+
 ### Switch projects or modes
 
 ```sh
@@ -104,6 +113,7 @@ ching logout --revoke            # also revoke the server-side session
 | `ching use <project>` | Switch active project (visible id or numeric id) |
 | `ching use --live \| --test` | Switch active mode |
 | `ching open [page]` | Open a dashboard page in the browser |
+| `ching projects list/create` | List your projects or create a new one |
 | `ching products list/get/create/update` | Manage products |
 | `ching prices list/get/create` | Manage prices |
 | `ching customers list/get/create` | Manage customers |
