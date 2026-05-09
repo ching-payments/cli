@@ -62,6 +62,34 @@ ching prices create \
 
 Amounts are always in **agorot** (the smallest ILS unit). `₪49.90` → `--amount=4990`. The CLI rejects decimals with a clear error.
 
+### Install the CHING AI skill
+
+Teach Claude Code and Cursor everything they need to know about CHING in one command. The skill ships from [`github.com/ching-payments/skill`](https://github.com/ching-payments/skill).
+
+```sh
+ching skills install
+```
+
+The installer asks whether to install **globally** (`~/.claude/skills`, `~/.cursor/rules` - available in every project) or **for the current project only** (`./.claude/skills`, `./.cursor/rules` - shipped to teammates via git). Pre-selects only the AI tools it detects on your machine.
+
+When the upstream skill changes, refresh your install with:
+
+```sh
+ching skills update              # asks: global vs current project
+```
+
+`update` only touches AI tools where the skill is already installed at the chosen scope - it never silently expands to new tools.
+
+To skip the prompts in scripts:
+
+```sh
+ching skills install --global --target=claude,cursor --force
+ching skills install --project --target=claude
+ching skills update   --global
+ching skills uninstall --global
+ching skills list
+```
+
 ### List or create projects
 
 ```sh
@@ -113,6 +141,7 @@ ching logout --revoke            # also revoke the server-side session
 | `ching use <project>` | Switch active project (visible id or numeric id) |
 | `ching use --live \| --test` | Switch active mode |
 | `ching open [page]` | Open a dashboard page in the browser |
+| `ching skills install/update/uninstall/list` | Install, refresh, or remove the CHING AI skill in Claude Code / Cursor |
 | `ching projects list/create` | List your projects or create a new one |
 | `ching products list/get/create/update` | Manage products |
 | `ching prices list/get/create` | Manage prices |
