@@ -77,8 +77,39 @@ export const customerSchema = z.object({
 
 export const customerListSchema = z.array(customerSchema)
 
+export const chargeSchema = z.object({
+  id: z.string(),
+  object: z.literal("charge").optional(),
+  customer: z.string().nullable().optional(),
+  payment_method: z.string().nullable().optional(),
+  card_brand: z.string().nullable().optional(),
+  card_last4: z.string().nullable().optional(),
+  wallet_method: z.string().nullable().optional(),
+  amount: z.number(),
+  amount_captured: z.number().nullable().optional(),
+  currency: z.string().optional(),
+  status: z.string(),
+  description: z.string().nullable().optional(),
+  captured: z.boolean().optional(),
+  capture_method: z.string().optional(),
+  authorized_at: z.string().nullable().optional(),
+  capturable_until: z.string().nullable().optional(),
+  captured_at: z.string().nullable().optional(),
+  cancellation_reason: z.string().nullable().optional(),
+  refunded_amount: z.number().optional(),
+  failure_code: z.string().nullable().optional(),
+  failure_message: z.string().nullable().optional(),
+  livemode: z.boolean().optional(),
+  created: z.union([z.string(), z.number()]).optional(),
+})
+
+export const chargeListSchema = z.array(
+  chargeSchema.extend({ customer_name: z.string().nullable().optional() }),
+)
+
 export type Me = z.infer<typeof meSchema>
 export type Project = z.infer<typeof projectSchema>
 export type Product = z.infer<typeof productSchema>
 export type Price = z.infer<typeof priceSchema>
 export type Customer = z.infer<typeof customerSchema>
+export type Charge = z.infer<typeof chargeSchema>

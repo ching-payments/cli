@@ -14,6 +14,14 @@ import { pricesCreateCommand } from "./commands/prices/create"
 import { customersListCommand } from "./commands/customers/list"
 import { customersGetCommand } from "./commands/customers/get"
 import { customersCreateCommand } from "./commands/customers/create"
+import { chargesListCommand } from "./commands/charges/list"
+import { chargesGetCommand } from "./commands/charges/get"
+import { chargesCaptureCommand } from "./commands/charges/capture"
+import { chargesCancelCommand } from "./commands/charges/cancel"
+import {
+  maybeRefreshVersionCacheInBackground,
+  printUpdateBannerIfAvailable,
+} from "./api/versionCheck"
 import { projectsListCommand } from "./commands/projects/list"
 import { projectsCreateCommand } from "./commands/projects/create"
 import { skillInstallCommand } from "./commands/skill/install"
@@ -224,6 +232,42 @@ prices
     await pricesCreateCommand(mergeGlobals(opts))
   })
 
+// charges - mostly for runtime J4J5 manual-capture flows where a
+// fulfilment script needs to capture or cancel held charges from the
+// terminal. Day-to-day chargeable use still lives in the dashboard.
+const charges = program.command("charges").description("Inspect and manage charges (incl. J4J5 manual capture)")
+charges
+  .command("list")
+  .description("List the most recent charges on the active project")
+  .option("--customer <id>", "Filter to a single customer (cus_*)")
+  .option("--requires-capture", "Show only charges currently awaiting capture (J4J5 holds)")
+  .action(async (opts) => {
+    await chargesListCommand(mergeGlobals(opts))
+  })
+charges
+  .command("get <id>")
+  .description("Retrieve a single charge (ch_*)")
+  .action(async (id: string, opts) => {
+    await chargesGetCommand(id, mergeGlobals(opts))
+  })
+charges
+  .command("capture <id>")
+  .description("Capture a manual-capture hold. Full capture by default; pass --amount for partial.")
+  .option("--amount <agorot>", "Capture amount in agorot (must be ≤ original authorized amount)")
+  .action(async (id: string, opts) => {
+    await chargesCaptureCommand(id, mergeGlobals(opts))
+  })
+charges
+  .command("cancel <id>")
+  .description("Cancel (void) a manual-capture hold and release it on the CHING side")
+  .option(
+    "--reason <reason>",
+    "requested_by_customer | fraudulent | abandoned (default: requested_by_customer)",
+  )
+  .action(async (id: string, opts) => {
+    await chargesCancelCommand(id, mergeGlobals(opts))
+  })
+
 // customers
 const customers = program.command("customers").description("Manage customers")
 customers
@@ -246,9 +290,36 @@ customers
     await customersCreateCommand(mergeGlobals(opts))
   })
 
-program.parseAsync(process.argv).catch((err) => {
-  process.stderr.write(
-    err instanceof Error ? `Error: ${err.message}\n` : `Error: ${String(err)}\n`,
-  )
-  process.exit(1)
-})
+// Update-check is opt-out per-command. `--version` / `--help` exit before
+// any command runs, so the banner would never reach them anyway; `logout`
+// is excluded so a user removing creds doesn't get an upsell on the way
+// out. JSON output is suppressed inside printUpdateBannerIfAvailable so
+// machine-readable callers stay clean.
+const SKIP_UPDATE_CHECK_FOR = new Set(["logout"])
+const invokedSubcommand = process.argv[2]
+const skipUpdateCheck =
+  !invokedSubcommand || SKIP_UPDATE_CHECK_FOR.has(invokedSubcommand)
+
+if (!skipUpdateCheck) {
+  // Kick off the background refresh BEFORE parseAsync so the fetch and the
+  // command run concurrently. Fire-and-forget; if the registry is slow we
+  // just keep showing yesterday's cached answer.
+  maybeRefreshVersionCacheInBackground()
+}
+
+program
+  .parseAsync(process.argv)
+  .then(() => {
+    if (skipUpdateCheck) return
+    // Read --json off the root program at exit so script consumers stay
+    // clean. The banner uses cached data only - never blocks on the
+    // background fetch.
+    const rootJson = !!program.opts().json
+    printUpdateBannerIfAvailable(pkgVersion, rootJson)
+  })
+  .catch((err) => {
+    process.stderr.write(
+      err instanceof Error ? `Error: ${err.message}\n` : `Error: ${String(err)}\n`,
+    )
+    process.exit(1)
+  })

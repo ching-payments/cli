@@ -120,6 +120,27 @@ ching products create --name=test --project 42
 ching products list
 ching prices list --product prod_abc123
 ching customers list --limit 20
+ching charges list                              # all charges
+ching charges list --requires-capture           # only J4J5 holds
+```
+
+### Capture or cancel J4J5 holds from a fulfilment script
+
+When you use `capture_method: 'manual'` on a checkout session, the customer's
+card is authorized but not charged. Your warehouse/fulfilment software can
+then drive the final outcome:
+
+```sh
+# Capture the full authorized amount (the typical case).
+ching charges capture ch_AbCdEf
+
+# Or capture less - useful for variable-weight goods. The unused balance
+# is auto-released to the customer's card.
+ching charges capture ch_AbCdEf --amount=13400
+
+# Or cancel the hold entirely. (CHING-side release is immediate; the
+# customer's bank may take up to 10 days to remove the hold.)
+ching charges cancel ch_AbCdEf --reason=abandoned
 ```
 
 Add `--json` for machine-readable output. By default, lists print as tables.
@@ -146,6 +167,9 @@ ching logout --revoke            # also revoke the server-side session
 | `ching products list/get/create/update` | Manage products |
 | `ching prices list/get/create` | Manage prices |
 | `ching customers list/get/create` | Manage customers |
+| `ching charges list/get` | Inspect charges. `--requires-capture` filters to J4J5 holds awaiting capture |
+| `ching charges capture <ch_*>` | Capture a manual-capture (J4J5) hold. `--amount=<agorot>` for partial; defaults to full |
+| `ching charges cancel <ch_*>` | Cancel (void) a J4J5 hold. `--reason=requested_by_customer\|fraudulent\|abandoned` |
 
 Run `ching <command> --help` for full flag listings.
 
@@ -161,6 +185,10 @@ These work on every command:
 ## Where credentials live
 
 `~/.ching/config.json` (mode `0600`). Browser sign-in stores a JWT-style session token; `--with-key` stores an API key in the same file. You can revoke browser sessions any time from the [API keys page](https://app.ching.co.il/api-keys) on the dashboard.
+
+## Update checks
+
+After each command the CLI prints a one-line banner when a newer version of `@ching-payments/cli` is available on npm. The check runs against `registry.npmjs.org` at most once every 24h and caches the result in `~/.ching/version-cache.json`. Suppressed automatically in `--json` mode and when `CI=true`. To disable entirely, set `CHING_DISABLE_UPDATE_CHECK=1`.
 
 ## License
 
