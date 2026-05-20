@@ -28,6 +28,13 @@ import { skillInstallCommand } from "./commands/skill/install"
 import { skillUninstallCommand } from "./commands/skill/uninstall"
 import { skillListCommand } from "./commands/skill/list"
 import { skillUpdateCommand } from "./commands/skill/update"
+import { webhooksCreateCommand } from "./commands/webhooks/create"
+import { webhooksListCommand } from "./commands/webhooks/list"
+import { webhooksDeleteCommand } from "./commands/webhooks/delete"
+import { apiKeysCreateCommand } from "./commands/api-keys/create"
+import { apiKeysListCommand } from "./commands/api-keys/list"
+import { apiKeysRenameCommand } from "./commands/api-keys/rename"
+import { apiKeysDeleteCommand } from "./commands/api-keys/delete"
 
 interface PackageJson {
   version?: string
@@ -288,6 +295,62 @@ customers
   .option("--phone <phone>", "Customer phone")
   .action(async (opts) => {
     await customersCreateCommand(mergeGlobals(opts))
+  })
+
+// webhooks
+const webhooks = program
+  .command("webhooks")
+  .description("Manage webhook endpoints (scoped to the active test/live mode)")
+webhooks
+  .command("create")
+  .description("Register a webhook endpoint. Prints the signing secret once - copy it now.")
+  .option("--url <url>", "Endpoint URL (https://...)")
+  .option("--events <event...>", "Repeatable or comma-separated, e.g. charge.succeeded charge.failed")
+  .action(async (opts) => {
+    await webhooksCreateCommand(mergeGlobals(opts))
+  })
+webhooks
+  .command("list")
+  .description("List webhook endpoints in the active mode (secrets are never shown)")
+  .action(async (opts) => {
+    await webhooksListCommand(mergeGlobals(opts))
+  })
+webhooks
+  .command("delete <id>")
+  .description("Delete a webhook endpoint by numeric id")
+  .action(async (id: string, opts) => {
+    await webhooksDeleteCommand(id, mergeGlobals(opts))
+  })
+
+// api-keys
+const apiKeys = program
+  .command("api-keys")
+  .description("Manage API keys. Mode (--test/--live) decides which kind a new key is.")
+apiKeys
+  .command("create")
+  .description("Issue a new API key. Prints the key once - copy it now. (Requires browser login.)")
+  .option("--name <name>", "Optional label for the key")
+  .action(async (opts) => {
+    await apiKeysCreateCommand(mergeGlobals(opts))
+  })
+apiKeys
+  .command("list")
+  .description("List API keys (both test and live; only the masked preview is shown)")
+  .action(async (opts) => {
+    await apiKeysListCommand(mergeGlobals(opts))
+  })
+apiKeys
+  .command("rename <id>")
+  .description("Rename an API key by numeric id")
+  .option("--name <name>", "New label for the key")
+  .action(async (id: string, opts) => {
+    await apiKeysRenameCommand(id, mergeGlobals(opts))
+  })
+apiKeys
+  .command("delete <id>")
+  .description("Delete an API key by numeric id (the key stops working immediately)")
+  .action(async (id: string, opts) => {
+    await apiKeysDeleteCommand(id, mergeGlobals(opts))
   })
 
 // Update-check is opt-out per-command. `--version` / `--help` exit before

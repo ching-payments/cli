@@ -11,6 +11,7 @@ npx @ching-payments/cli login
 - Browser-based sign in (no copy-pasting API keys)
 - Switch projects and test/live mode without re-logging in
 - Manage products, prices, and customers from the terminal
+- Create webhook endpoints and API keys, surfacing the secret once
 - Open dashboard pages with `ching open`
 
 ## Install
@@ -145,6 +146,41 @@ ching charges cancel ch_AbCdEf --reason=abandoned
 
 Add `--json` for machine-readable output. By default, lists print as tables.
 
+### Webhooks
+
+Webhooks are scoped to the active mode - a webhook you create in test mode
+only fires for test events. The signing secret (`whsec_...`) is printed
+**once** at creation and can never be retrieved again; copy it immediately.
+
+```sh
+ching webhooks create \
+  --url https://example.com/webhooks/ching \
+  --events charge.succeeded charge.failed     # or: --events 'charge.succeeded,charge.failed'
+
+ching webhooks list                            # current mode only; secrets never shown
+ching webhooks delete 42                       # by numeric id
+```
+
+### API keys
+
+The active mode decides which kind of key you get: in test mode you get a
+`ck_test_...` key, in live mode a `ck_live_...` key. Live keys require a
+linked business identity and an active payment provider. The full key is
+shown **once** at creation - copy it immediately; afterwards only a masked
+preview is available.
+
+```sh
+ching api-keys create --name "CI deploy key"   # uses the active mode (--live / --test to override)
+ching api-keys list                            # shows test + live keys, masked preview only
+ching api-keys rename 7 --name "Renamed key"
+ching api-keys delete 7                         # the key stops working immediately
+```
+
+Creating a key needs a browser session (`ching login`), because the key is
+tied to your user. If you signed in with `--with-key`, `api-keys create`
+will tell you to run `ching login` first. Listing, renaming, and deleting
+work with either sign-in method.
+
 ### Sign out
 
 ```sh
@@ -170,6 +206,8 @@ ching logout --revoke            # also revoke the server-side session
 | `ching charges list/get` | Inspect charges. `--requires-capture` filters to J4J5 holds awaiting capture |
 | `ching charges capture <ch_*>` | Capture a manual-capture (J4J5) hold. `--amount=<agorot>` for partial; defaults to full |
 | `ching charges cancel <ch_*>` | Cancel (void) a J4J5 hold. `--reason=requested_by_customer\|fraudulent\|abandoned` |
+| `ching webhooks create/list/delete` | Manage webhook endpoints (mode-scoped). `create` prints the signing secret once |
+| `ching api-keys create/list/rename/delete` | Manage API keys. `create` prints the key once; mode picks test vs live |
 
 Run `ching <command> --help` for full flag listings.
 

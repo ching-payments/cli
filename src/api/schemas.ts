@@ -107,9 +107,72 @@ export const chargeListSchema = z.array(
   chargeSchema.extend({ customer_name: z.string().nullable().optional() }),
 )
 
+// Webhook create response. The signing `secret` (whsec_...) is disclosed
+// once here and never returned again, so the create command must surface
+// it loudly.
+export const webhookSchema = z.object({
+  url: z.string(),
+  events: z.array(z.string()),
+  secret: z.string(),
+  active: z.boolean().optional(),
+  livemode: z.boolean().optional(),
+})
+
+// Webhook list item. No secret - the API never re-discloses it.
+export const webhookListItemSchema = z.object({
+  id: z.number(),
+  url: z.string(),
+  events: z.array(z.string()),
+  active: z.boolean().optional(),
+  livemode: z.boolean().optional(),
+  created: z.union([z.string(), z.number()]).nullable().optional(),
+})
+
+export const webhookListSchema = z.array(webhookListItemSchema)
+
+// API key create response. The raw `key` (ck_test_/ck_live_...) is
+// disclosed once here and never returned again - only `preview` shows up
+// in subsequent reads.
+export const apiKeySchema = z.object({
+  id: z.number(),
+  key: z.string(),
+  preview: z.string().optional(),
+  name: z.string().optional(),
+  livemode: z.boolean().optional(),
+  active: z.boolean().optional(),
+})
+
+// API key as returned in the list (GET /projects/current). `key` is the
+// masked preview here, not the raw key.
+export const apiKeyListItemSchema = z.object({
+  id: z.number(),
+  name: z.string().nullable().optional(),
+  livemode: z.boolean().optional(),
+  active: z.boolean().optional(),
+  key: z.string().nullable().optional(),
+  createdAt: z.union([z.string(), z.number()]).nullable().optional(),
+  lastUsed: z.union([z.string(), z.number()]).nullable().optional(),
+})
+
+// We only read the apiKeys array off /projects/current; everything else
+// on that payload is ignored.
+export const currentProjectSchema = z.object({
+  apiKeys: z.array(apiKeyListItemSchema).default([]),
+})
+
+// PATCH/DELETE key responses both echo back at least the id.
+export const apiKeyMutationSchema = z.object({
+  id: z.number(),
+  name: z.string().nullable().optional(),
+})
+
 export type Me = z.infer<typeof meSchema>
 export type Project = z.infer<typeof projectSchema>
 export type Product = z.infer<typeof productSchema>
 export type Price = z.infer<typeof priceSchema>
 export type Customer = z.infer<typeof customerSchema>
 export type Charge = z.infer<typeof chargeSchema>
+export type Webhook = z.infer<typeof webhookSchema>
+export type WebhookListItem = z.infer<typeof webhookListItemSchema>
+export type ApiKey = z.infer<typeof apiKeySchema>
+export type ApiKeyListItem = z.infer<typeof apiKeyListItemSchema>

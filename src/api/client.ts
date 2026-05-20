@@ -16,6 +16,10 @@ export interface RequestOptions {
   // token).
   cfg?: CliConfig
   bearer?: string
+  // Some endpoints (e.g. DELETE /webhooks/:id) return `{ success: true }`
+  // with no `data` field. Set this to false to accept that shape and
+  // resolve to undefined instead of throwing "Unexpected response shape".
+  expectData?: boolean
 }
 
 interface ApiEnvelope<T> {
@@ -112,6 +116,17 @@ export async function request<T>(opts: RequestOptions): Promise<T> {
       serverCode: apiErr?.code ?? null,
       details: apiErr?.details,
     })
+  }
+
+  if (opts.expectData === false) {
+    if (!parsed || parsed.success !== true) {
+      throw new ApiError({
+        code: "UNKNOWN",
+        status: res.status,
+        message: "Unexpected response shape from CHING API",
+      })
+    }
+    return undefined as T
   }
 
   if (!parsed || parsed.success !== true || parsed.data === undefined) {
